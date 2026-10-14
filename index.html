@@ -85,10 +85,10 @@ main {
   min-height: 100%;
   max-width: 960px; margin: 0 auto;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: clamp(12px, 2.6vh, 26px);
-  padding-top: clamp(14px, 3vh, 32px); padding-bottom: 16px;
+  gap: 40px;
+  padding-top: 48px; padding-bottom: 32px;
 }
-header { text-align: center; display: grid; gap: 6px; margin-top: auto; }
+header { text-align: center; display: grid; gap: 14px; margin-top: auto; }
 h1 {
   margin: 0;
   font-family: var(--font-title); font-weight: 400;
@@ -231,8 +231,8 @@ h1 {
 .status.err { color: var(--horde-hi); }
 .legal {
   width: 100%; max-width: 1000px;
-  display: grid; gap: 8px;
-  padding-top: 16px; margin-top: auto;
+  display: grid; gap: 20px;
+  padding-top: 36px; margin-top: auto;
   border-top: 1px solid var(--line);
   text-align: center;
   color: #6f6d7d; font-size: 11px; line-height: 1.5;
@@ -241,7 +241,7 @@ h1 {
 /* made-by credit */
 .credit {
   display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;
-  gap: 14px 24px; padding-top: 4px; padding-bottom: 16px; margin-bottom: 8px; border-bottom: 1px solid var(--line); text-align: left;
+  gap: 20px 32px; padding-bottom: 36px; margin-bottom: 16px; border-bottom: 1px solid var(--line); text-align: left;
 }
 .credit-me { display: flex; align-items: center; gap: 14px; min-width: 0; flex: 1 1 320px; }
 .credit-photo {
@@ -622,18 +622,18 @@ h1 {
   // size the preview so the whole screen fits without scrolling
   const mainEl = document.querySelector("main");
   function fitStage() {
-    const kids = [...mainEl.children].filter(el => !el.hidden && el.offsetParent !== null);
+    // the app part (title → buttons) fills the first screen; the footer can sit below the fold
+    const kids = [...mainEl.children].filter(el => !el.hidden && el.offsetParent !== null && el.tagName !== "FOOTER");
     if (!kids.length) return;
     const cs = getComputedStyle(mainEl);
     const gap = parseFloat(cs.rowGap) || 0;
     const content = kids.reduce((h, el) => h + el.getBoundingClientRect().height, 0)
-      + gap * (kids.length - 1) + parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
-    const fw = parseFloat(getComputedStyle(stage).getPropertyValue("--fw")) || 7;
+      + gap * kids.length + parseFloat(cs.paddingTop);
+    const fw = 7;
     const other = content - stage.offsetHeight + 2 * fw;
     const avail = document.body.clientHeight - other;
-    // on phones, if it can't fit anyway, keep the preview big and let the page scroll
     // phones: a compact preview (~78% of the width, up to 300px) leaves room around it
-    const size = innerWidth <= 640 ? Math.min(300, innerWidth * 0.78) : Math.max(180, Math.min(400, avail));
+    const size = innerWidth <= 640 ? Math.min(300, innerWidth * 0.78) : Math.max(300, Math.min(400, avail));
     stage.style.setProperty("--stage-max", Math.round(size) + "px");
   }
   addEventListener("resize", fitStage);
