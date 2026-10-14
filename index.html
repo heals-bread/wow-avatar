@@ -136,6 +136,23 @@ h1 {
   transition: transform .2s ease;
 }
 .stage canvas { width: 100%; height: 100%; display: block; border-radius: 50%; background: var(--bg-2); }
+.stage { perspective: 900px; }
+.tilt {
+  position: absolute; inset: 0; border-radius: 50%;
+  transform-style: preserve-3d;
+  transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) scale(var(--ts, 1));
+  box-shadow: var(--sx, 0px) var(--sy, 18px) 50px -18px rgba(0,0,0,.75);
+  transition: transform .6s cubic-bezier(.2,.8,.2,1), box-shadow .6s cubic-bezier(.2,.8,.2,1);
+  will-change: transform;
+}
+.stage.tilting .tilt { transition: transform .12s ease-out, box-shadow .12s ease-out; }
+.shine {
+  position: absolute; inset: 0; border-radius: 50%; pointer-events: none;
+  background: radial-gradient(circle at var(--gx, 50%) var(--gy, 50%), rgba(255,255,255,.28), rgba(255,255,255,.06) 35%, transparent 60%);
+  mix-blend-mode: soft-light;
+  opacity: 0; transition: opacity .4s ease;
+}
+.stage.tilting .shine { opacity: 1; }
 .stage.has-photo { cursor: grab; }
 .stage.dragging { cursor: grabbing; }
 .stage::after {
@@ -201,11 +218,14 @@ h1 {
   </div>
 
   <div class="stage" id="stage" tabindex="0" role="button" aria-label="Upload a photo">
+    <div class="tilt" id="tilt">
     <canvas id="cv" width="1440" height="1440"></canvas>
     <div class="hint" id="hint">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
       Drop your photo here
       <small>or tap to choose a file</small>
+    </div>
+    <div class="shine" aria-hidden="true"></div>
     </div>
   </div>
 
@@ -468,6 +488,33 @@ h1 {
     zoom = Math.max(1, Math.min(3, zoom - e.deltaY * 0.0015));
     zoomEl.value = String(zoom); render();
   }, { passive: false });
+
+  // v3-tilt · 3D tilt toward the cursor: the edge under the pointer comes forward
+  const canTilt = !matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const TILT = 12;
+  function setTilt(dx, dy, on) {
+    const st = stage.style;
+    st.setProperty("--rx", (dy * TILT).toFixed(2) + "deg");
+    st.setProperty("--ry", (-dx * TILT).toFixed(2) + "deg");
+    st.setProperty("--sx", (-dx * 18).toFixed(1) + "px");
+    st.setProperty("--sy", (18 - dy * 14).toFixed(1) + "px");
+    st.setProperty("--gx", (50 + dx * 40).toFixed(1) + "%");
+    st.setProperty("--gy", (50 + dy * 40).toFixed(1) + "%");
+    st.setProperty("--ts", on ? "1.03" : "1");
+    stage.classList.toggle("tilting", on);
+  }
+  if (canTilt) {
+    stage.addEventListener("pointermove", e => {
+      if (e.pointerType === "touch") return;
+      if (drag) { setTilt(0, 0, false); return; }
+      const b = stage.getBoundingClientRect();
+      const clamp = v => Math.max(-1, Math.min(1, v));
+      setTilt(clamp((e.clientX - b.left - b.width / 2) / (b.width / 2)),
+              clamp((e.clientY - b.top - b.height / 2) / (b.height / 2)), true);
+    });
+    stage.addEventListener("pointerleave", () => setTilt(0, 0, false));
+    stage.addEventListener("pointerdown", () => setTilt(0, 0, false));
+  }
 
   // download
   let downloads = null;
