@@ -12,7 +12,7 @@
 <meta property="og:image" content="https://wow-avatar.vercel.app/og.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="WoW Avatar: Alliance and Horde profile photo frames">
+<meta property="og:image:alt" content="World of Warcraft Avatar: Alliance and Horde banner. Your LinkedIn photo in Horde or Alliance colors">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="World of Warcraft Avatar">
 <meta name="twitter:description" content="Make your LinkedIn photo #ForTheHorde or #ForTheAlliance.">
@@ -265,7 +265,10 @@ h1 {
 .credit-link svg { width: 22px; height: 22px; flex: none; }
 .credit-link b { font: 700 15px/1 var(--font-body); color: inherit; }
 @media (max-width: 640px) {
-  .credit { flex-direction: column; align-items: stretch; gap: 10px; padding-bottom: 12px; }
+  main { gap: 30px; padding-top: 30px; padding-bottom: 30px; }
+  .legal { padding-top: 30px; gap: 30px; }
+  .credit { flex-direction: column; align-items: stretch; gap: 30px; padding-top: 0; padding-bottom: 30px; margin-bottom: 0; }
+  .controls { gap: 16px; }
   .credit-photo { width: 48px; height: 48px; }
   .credit-link { padding: 10px 12px; }
   .credit-me { flex: none; }
@@ -275,7 +278,6 @@ h1 {
 @media (max-width: 420px) {
   .btn { font-size: 14px; padding: 14px 6px; }
   .row { gap: 8px; }
-  main { gap: 16px; padding-top: 18px; padding-bottom: 14px; }
   .faction { padding: 14px 8px; font-size: 13px; letter-spacing: .1em; }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
@@ -630,7 +632,8 @@ h1 {
     const other = content - stage.offsetHeight + 2 * fw;
     const avail = document.body.clientHeight - other;
     // on phones, if it can't fit anyway, keep the preview big and let the page scroll
-    const size = (innerWidth <= 640 && avail < 200) ? 400 : Math.max(180, Math.min(400, avail));
+    // phones scroll anyway: keep the preview full width there
+    const size = innerWidth <= 640 ? 400 : Math.max(180, Math.min(400, avail));
     stage.style.setProperty("--stage-max", Math.round(size) + "px");
   }
   addEventListener("resize", fitStage);
